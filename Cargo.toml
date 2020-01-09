@@ -3,6 +3,13 @@ name = "oin"
 version = "0.1.0"
 authors = ["clearloop <udtrokia@gmail.com>"]
 edition = "2018"
+description = "A new generation decentralized identity system"
+repository = "https://github.com/clearloop/oin"
+license = "MIT"
+documentation = "https://docs.rs/oin"
+homepage = "https://github.com/clearloop/oin"
+keywords = ["identity"]
+readme = './README.md'
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -12,4 +19,3 @@ rand_core = "0.5.1"
 
 [dependencies.ed25519-dalek]
 version = "1.0.0-pre.3"
-features = ["serde"]

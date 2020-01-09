@@ -94,7 +94,6 @@ dependencies = [
  "clear_on_drop",
  "curve25519-dalek",
  "rand",
- "serde",
  "sha2",
 ]
 
@@ -191,12 +190,6 @@ checksum = "ca3129af7b92a17112d59ad498c6f81eaf463253766b90396d39ea7a39d6613c"
 dependencies = [
  "rand_core",
 ]
-
-[[package]]
-name = "serde"
-version = "1.0.104"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "414115f25f818d7dfccec8ee535d76949ae78584fc4f79a6f45a904bf8ab4449"
 
 [[package]]
 name = "sha2"

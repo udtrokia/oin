@@ -15,9 +15,9 @@ type TokenBytes = [u8; 64];
 /// + pkey: https://oin.example.com/pkey
 /// + name: https://oin.example.com/pkey/name
 pub struct Identity {
-    pub name: &'static str,
+    pub name: String,
     pub pkey: PublicKeyBytes,
-    pub tokens: HashMap<PublicKeyBytes, SignatureBytes>,
+    pub sigs: HashMap<PublicKeyBytes, SignatureBytes>,
 }
 
 impl Identity {
@@ -28,9 +28,9 @@ impl Identity {
 
         (
             Identity {
-                name: "",
+                name: "".to_string(),
                 pkey: keypair.public.to_bytes(),
-                tokens: HashMap::new(),
+                sigs: HashMap::new(),
             },
             keypair.secret.to_bytes(),
         )
@@ -38,7 +38,7 @@ impl Identity {
 
     /// Generate random token
     pub fn token() -> TokenBytes {
-        let mut rng: [u8; 64] = [0; 64];
+        let mut rng = [0; 64];
         let mut orng = rand::rngs::OsRng {};
         orng.fill_bytes(&mut rng);
 
@@ -51,29 +51,54 @@ impl Identity {
         // services id
         id: PublicKeyBytes,
         // login token
-        msg: &[u8],
+        tk: TokenBytes,
         // user signature with token
         sig: SignatureBytes,
     ) -> Result<(), Error> {
-        PublicKey::from_bytes(&self.pkey)?.verify(msg, &Signature::from_bytes(&sig)?)?;
-        self.tokens.insert(id, sig);
+        PublicKey::from_bytes(&self.pkey)?.verify(&tk, &Signature::from_bytes(&sig)?)?;
+        self.sigs.insert(id, sig);
         Ok(())
+    }
+
+    /// Check if identity token paired
+    pub fn state(&self, id: PublicKeyBytes, sig: SignatureBytes) -> Result<(), Error> {
+        if let Some(s) = self.sigs.get(&id) {
+            if s.to_vec() == sig.to_vec() {
+                return Ok(());
+            }
+
+            return Err(Error::TokenError);
+        }
+
+        Err(Error::TokenError)
+    }
+
+    /// Update token for id
+    pub fn update(&mut self, id: PublicKeyBytes, sig: SignatureBytes) -> Result<(), Error> {
+        if self.sigs.insert(id, sig).is_some() {
+            return Ok(());
+        }
+
+        Err(Error::TokenError)
     }
 }
 
+/// Generete identity from public key
 impl From<PublicKeyBytes> for Identity {
     fn from(b: PublicKeyBytes) -> Identity {
         Identity {
-            name: "",
+            name: "".to_string(),
             pkey: b,
-            tokens: HashMap::new(),
+            sigs: HashMap::new(),
         }
     }
 }
 
-/// Errors
+/// Abstract Errors
+#[derive(Debug)]
 pub enum Error {
     LoginError,
+    TokenError,
 }
 
 impl From<SignatureError> for Error {
